@@ -3,6 +3,7 @@
 Lead authors: Nicolas Guigui and Nina Miolane.
 """
 
+import torch
 import geomstats.algebra_utils as utils
 import geomstats.backend as gs
 from geomstats.geometry.base import LevelSet
@@ -37,12 +38,12 @@ class _SpecialOrthogonalMatrices(MatrixLieGroup, LevelSet):
 
     def __init__(self, n, equip=True):
         self.n = n
-	cuda = torch.cuda.is_available()
-	if cuda:
-		device = 'cuda'
-	else:
-		device = 'cpu'
-	self._value = gs.eye(n).to(device)
+        cuda = torch.cuda.is_available()
+        if cuda:
+            device = 'cuda'
+        else:
+            device = 'cpu'
+        self._value = gs.eye(n).to(device)
 
         super().__init__(
             dim=int((n * (n - 1)) / 2),
@@ -661,7 +662,7 @@ class _SpecialOrthogonal2Vectors(_SpecialOrthogonalVectors):
         rot_mat: array-like, shape=[..., 2, 2]
             Rotation matrix.
         """
-	device = rot_vec.device
+        device = rot_vec.device
         rot_vec = self.regularize(rot_vec)
 
         cos_term = gs.cos(rot_vec)
@@ -809,7 +810,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         regularized_point : array-like, shape=[..., 3]
             Regularized point.
         """
-	device = point.device
+        device = point.device
         theta = gs.linalg.norm(point, axis=-1)
         k = gs.floor(theta / 2.0 / gs.pi)
 
@@ -923,7 +924,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         regularized_rot_vec : array-like, shape=[..., 3]
             Rotation vector.
         """
-	device = rot_mat.device
+        device = rot_mat.device
         is_vec = gs.ndim(rot_mat) > 2
 
         trace = gs.trace(rot_mat)
@@ -945,7 +946,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
             "...,...i->...i", numerator / denominator, rot_vec_not_pi
         )
 
-        vector_outer = 0.5 * (gs.eye(3)).to(device) + rot_mat)
+        vector_outer = 0.5 * (gs.eye(3).to(device) + rot_mat)
         vector_outer = gs.set_diag(
             vector_outer, gs.maximum(0.0, gs.diagonal(vector_outer, axis1=-2, axis2=-1))
         )
@@ -980,7 +981,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         rot_mat: array-like, shape=[..., 3]
             Rotation matrix.
         """
-	device = rot_vec.device
+        device = rot_vec.device
         rot_vec = self.regularize(rot_vec)
 
         squared_angle = gs.sum(rot_vec**2, axis=-1)
@@ -1585,7 +1586,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         jacobian : array-like, shape=[..., 3, 3]
             Jacobian.
         """
-	device = point.device
+        device = point.device
         point = self.regularize(point)
         squared_angle = gs.sum(point**2, axis=-1)
 
