@@ -1602,7 +1602,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
             squared_angle, utils.var_inv_tanc_close_0, order=4
         )
         squared_angle_ = gs.where(
-            squared_angle < utils.EPSILON, utils.EPSILON, squared_angle
+            squared_angle < utils.EPSILON, torch.tensor(utils.EPSILON).to(device), squared_angle
         )
         coef_2 = gs.where(
             squared_angle < utils.EPSILON, coef_2, (1 - coef_1) / squared_angle_
