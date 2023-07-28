@@ -2,6 +2,9 @@
 import math
 
 import geomstats.backend as gs
+import torch as _torch
+use_cuda = _torch.cuda.is_available()
+device = _torch.device("cuda" if use_cuda else "cpu")
 
 EPSILON = 1e-6
 COS_TAYLOR_COEFFS = [
@@ -157,6 +160,7 @@ def taylor_exp_even_func(point, taylor_function, order=5, tol=EPSILON):
     function_value: array-like
         Value of the function at point.
     """
+    tol = _torch.tensor(tol).to(device)
     approx = gs.einsum(
         "k,k...->...",
         gs.array(taylor_function["coefficients"][:order]),
