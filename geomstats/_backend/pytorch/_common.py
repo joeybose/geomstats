@@ -1,7 +1,7 @@
 import numpy as _np
 import torch as _torch
 use_cuda = _torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
+device = _torch.device("cuda" if use_cuda else "cpu")
 
 def from_numpy(x):
     return _torch.from_numpy(x)
