@@ -462,8 +462,8 @@ def set_diag(x, new_diag):
     1-D array, but modifies x instead of creating a copy.
     """
     arr_shape = x.shape
-    off_diag = (1 - _torch.eye(arr_shape[-1])) * x
-    diag = _torch.einsum("ij,...i->...ij", _torch.eye(new_diag.shape[-1]), new_diag)
+    off_diag = (1 - _torch.eye(arr_shape[-1]).to(x.device)) * x
+    diag = _torch.einsum("ij,...i->...ij", _torch.eye(new_diag.shape[-1]).to(x.device), new_diag)
     return diag + off_diag
 
 
