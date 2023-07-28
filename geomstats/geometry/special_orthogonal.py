@@ -37,7 +37,12 @@ class _SpecialOrthogonalMatrices(MatrixLieGroup, LevelSet):
 
     def __init__(self, n, equip=True):
         self.n = n
-        self._value = gs.eye(n)
+	cuda = torch.cuda.is_available()
+	if cuda:
+		device = 'cuda'
+	else:
+		device = 'cpu'
+	self._value = gs.eye(n).to(device)
 
         super().__init__(
             dim=int((n * (n - 1)) / 2),
@@ -656,10 +661,11 @@ class _SpecialOrthogonal2Vectors(_SpecialOrthogonalVectors):
         rot_mat: array-like, shape=[..., 2, 2]
             Rotation matrix.
         """
+	device = rot_vec.device
         rot_vec = self.regularize(rot_vec)
 
         cos_term = gs.cos(rot_vec)
-        cos_matrix = gs.einsum("...l,ij->...ij", cos_term, gs.eye(2))
+        cos_matrix = gs.einsum("...l,ij->...ij", cos_term, gs.eye(2).to(device))
         sin_term = gs.sin(rot_vec)
         sin_matrix = self.skew_matrix_from_vector(sin_term)
         return cos_matrix + sin_matrix
@@ -803,6 +809,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         regularized_point : array-like, shape=[..., 3]
             Regularized point.
         """
+	device = point.device
         theta = gs.linalg.norm(point, axis=-1)
         k = gs.floor(theta / 2.0 / gs.pi)
 
@@ -814,7 +821,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
 
         # angle in [0, pi]
         normalized_angle = gs.where(angle <= gs.pi, angle, 2 * gs.pi - angle)
-        norm_ratio = gs.where(gs.isclose(theta, 0.0), 1.0, normalized_angle / theta_eps)
+        norm_ratio = gs.where(gs.isclose(theta, 0.0), torch.tensor(1.0).to(device), normalized_angle / theta_eps)
 
         # reverse sign if angle was greater than pi
         norm_ratio = gs.where(angle > gs.pi, -norm_ratio, norm_ratio)
@@ -916,6 +923,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         regularized_rot_vec : array-like, shape=[..., 3]
             Rotation vector.
         """
+	device = rot_mat.device
         is_vec = gs.ndim(rot_mat) > 2
 
         trace = gs.trace(rot_mat)
@@ -937,7 +945,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
             "...,...i->...i", numerator / denominator, rot_vec_not_pi
         )
 
-        vector_outer = 0.5 * (gs.eye(3) + rot_mat)
+        vector_outer = 0.5 * (gs.eye(3)).to(device) + rot_mat)
         vector_outer = gs.set_diag(
             vector_outer, gs.maximum(0.0, gs.diagonal(vector_outer, axis1=-2, axis2=-1))
         )
@@ -972,6 +980,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         rot_mat: array-like, shape=[..., 3]
             Rotation matrix.
         """
+	device = rot_vec.device
         rot_vec = self.regularize(rot_vec)
 
         squared_angle = gs.sum(rot_vec**2, axis=-1)
@@ -980,7 +989,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         coef_1 = utils.taylor_exp_even_func(squared_angle, utils.sinc_close_0)
         coef_2 = utils.taylor_exp_even_func(squared_angle, utils.cosc_close_0)
 
-        term_1 = gs.eye(self.dim) + gs.einsum("...,...jk->...jk", coef_1, skew_rot_vec)
+        term_1 = gs.eye(self.dim).to(device) + gs.einsum("...,...jk->...jk", coef_1, skew_rot_vec)
 
         squared_skew_rot_vec = Matrices.mul(skew_rot_vec, skew_rot_vec)
 
@@ -1576,6 +1585,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         jacobian : array-like, shape=[..., 3, 3]
             Jacobian.
         """
+	device = point.device
         point = self.regularize(point)
         squared_angle = gs.sum(point**2, axis=-1)
 
@@ -1601,7 +1611,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         sign = 1.0 if left else -1.0
 
         return (
-            gs.einsum("...,...ij->...ij", coef_1, gs.eye(self.dim))
+            gs.einsum("...,...ij->...ij", coef_1, gs.eye(self.dim).to(device))
             + gs.einsum("...,...ij->...ij", coef_2, outer_)
             + sign * self.skew_matrix_from_vector(point) / 2.0
         )
