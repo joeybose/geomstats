@@ -818,7 +818,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         angle = theta - 2 * k * gs.pi
 
         # this avoids dividing by 0
-        theta_eps = gs.where(gs.isclose(theta, 0.0), 1.0, theta)
+        theta_eps = gs.where(gs.isclose(theta, 0.0), torch.tensor(1.0).to(device), theta)
 
         # angle in [0, pi]
         normalized_angle = gs.where(angle <= gs.pi, angle, 2 * gs.pi - angle)
@@ -846,7 +846,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         """
         if not hasattr(self, "metric"):
             return self.regularize(tangent_vec)
-
+        device = point.device
         tangent_vec_metric_norm = self.metric.norm(tangent_vec)
         tangent_vec_canonical_norm = gs.linalg.norm(tangent_vec, axis=-1)
 
@@ -855,7 +855,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
             tangent_vec_canonical_norm == 0, gs.atol, tangent_vec_canonical_norm
         )
         coef = gs.where(
-            tangent_vec_canonical_norm == 0.0, 1.0, tangent_vec_metric_norm / norm_eps
+            tangent_vec_canonical_norm == 0.0, torch.tensor(1.0).to(device), tangent_vec_metric_norm / norm_eps
         )
         coef_tangent_vec = gs.einsum("...,...i->...i", coef, tangent_vec)
 
