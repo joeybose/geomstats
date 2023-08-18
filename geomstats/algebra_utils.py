@@ -160,7 +160,7 @@ def taylor_exp_even_func(point, taylor_function, order=5, tol=EPSILON):
     function_value: array-like
         Value of the function at point.
     """
-    tol = _torch.tensor(tol).to(device)
+    tol = _torch.tensor(tol)
     approx = gs.einsum(
         "k,k...->...",
         gs.array(taylor_function["coefficients"][:order]),
