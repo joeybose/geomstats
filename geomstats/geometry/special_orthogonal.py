@@ -36,13 +36,16 @@ class _SpecialOrthogonalMatrices(MatrixLieGroup, LevelSet):
         Integer representing the shape of the matrices: n x n.
     """
 
-    def __init__(self, n, equip=True):
+    def __init__(self, n, equip=True, device=None):
         self.n = n
-        cuda = torch.cuda.is_available()
-        if cuda:
-            device = 'cuda'
-        else:
-            device = 'cpu'
+
+        if device is None:
+            cuda = torch.cuda.is_available()
+            if cuda:
+                device = 'cuda'
+            else:
+                device = 'cpu'
+            
         self._value = gs.eye(n).to(device)
 
         super().__init__(
@@ -846,7 +849,7 @@ class _SpecialOrthogonal3Vectors(_SpecialOrthogonalVectors):
         """
         if not hasattr(self, "metric"):
             return self.regularize(tangent_vec)
-        device = point.device
+        device = tangent_vec.device
         tangent_vec_metric_norm = self.metric.norm(tangent_vec)
         tangent_vec_canonical_norm = gs.linalg.norm(tangent_vec, axis=-1)
 

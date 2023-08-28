@@ -1,5 +1,7 @@
 import numpy as _np
 import torch as _torch
+import ipdb
+
 use_cuda = _torch.cuda.is_available()
 device = _torch.device("cuda" if use_cuda else "cpu")
 
@@ -8,6 +10,7 @@ def from_numpy(x):
 
 
 def array(val, dtype=None):
+    ipdb.set_trace()
     if _torch.is_tensor(val):
         if dtype is None or val.dtype == dtype:
             return val.clone().to(device)
@@ -29,6 +32,7 @@ def array(val, dtype=None):
 
 
 def cast(x, dtype):
+    ipdb.set_trace()
     if _torch.is_tensor(x):
         return x.to(dtype=dtype)
     return array(x, dtype=dtype).to(device)
