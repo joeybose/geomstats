@@ -120,5 +120,6 @@ class MatrixLieAlgebra(VectorSpace, abc.ABC):
         """
         if self.basis is None:
             raise NotImplementedError("basis not implemented")
-
-        return gs.einsum("...i,ijk ->...jk", basis_representation, self.basis)
+        
+        device = basis_representation.device
+        return gs.einsum("...i,ijk ->...jk", basis_representation, self.basis.to(device))
