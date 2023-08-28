@@ -36,17 +36,9 @@ class _SpecialOrthogonalMatrices(MatrixLieGroup, LevelSet):
         Integer representing the shape of the matrices: n x n.
     """
 
-    def __init__(self, n, equip=True, device=None):
+    def __init__(self, n, equip=True):
         self.n = n
-
-        if device is None:
-            cuda = torch.cuda.is_available()
-            if cuda:
-                device = 'cuda'
-            else:
-                device = 'cpu'
-            
-        self._value = gs.eye(n).to(device)
+        self._value = gs.eye(n)
 
         super().__init__(
             dim=int((n * (n - 1)) / 2),
@@ -78,7 +70,7 @@ class _SpecialOrthogonalMatrices(MatrixLieGroup, LevelSet):
         -------
         submersed_point : array-like, shape=[..., n, n]
         """
-        return self._aux_submersion(point) - self._value
+        return self._aux_submersion(point) - self._value.to(point.device)
 
     def tangent_submersion(self, vector, point):
         """Tangent submersion.
